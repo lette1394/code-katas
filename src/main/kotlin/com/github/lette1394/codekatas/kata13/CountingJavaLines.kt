@@ -49,9 +49,23 @@ class CommentLine : Filter {
 
 class MultiCommentLine : Filter {
     override fun invoke(javaCode: String): String {
+        var opened = false
         return javaCode
             .lines()
-            .filterNot { it.contains("/*") || it.contains("*/") || it.contains("*") }
-            .joinToString("\n")
+            .joinToString("\n") {
+                if (it.contains("/*")) {
+                    opened = true
+                    it.substring(0, it.indexOf("/*")).trim()
+                } else if (it.contains("*/")) {
+                    opened = false
+                    it.substring(it.indexOf("*/") + 2).trim()
+                } else if (opened) {
+                    "" // remove
+                } else {
+                    it
+                }
+            }.let {
+                EmptyLineFilter().invoke(it)
+            }
     }
 }

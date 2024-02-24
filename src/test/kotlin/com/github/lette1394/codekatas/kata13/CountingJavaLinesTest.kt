@@ -203,4 +203,23 @@ class CountingJavaLinesTest : StringSpec({
 
         sut.count() shouldBe 5
     }
+
+    "멀티 라인 주석의 시작이 코드 뒤에 있으면 라인 수로 센다" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |  public static void main(String[] args) { /*
+            |    System.out.println("Hello, World!");
+            |  }
+            |  a
+            |  b 123
+            |  cdefg
+            |  */   System.out.println("Hello World 2");
+            |  }
+            |}
+            """.trimMargin()
+        val sut = CountingJavaLines(javaCode)
+
+        sut.count() shouldBe 5
+    }
 })
