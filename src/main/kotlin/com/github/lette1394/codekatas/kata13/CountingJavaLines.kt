@@ -4,9 +4,11 @@ class CountingJavaLines(
     private val javaCode: String,
 ) {
     private val filters = listOf(
+        Log(),
+        MultiCommentLine(),
+        Log(),
         EmptyLineFilter(),
-        CommentLine(),
-        MultiCommentLine()
+        Log(),
     )
 
     fun count(): Long {
@@ -29,6 +31,13 @@ class IdentityFilter : Filter {
     }
 }
 
+class Log : Filter {
+    override fun invoke(javaCode: String): String {
+        println(javaCode)
+        return javaCode
+    }
+}
+
 class EmptyLineFilter : Filter {
     override fun invoke(javaCode: String): String {
         return javaCode
@@ -38,34 +47,75 @@ class EmptyLineFilter : Filter {
     }
 }
 
-class CommentLine : Filter {
-    override fun invoke(javaCode: String): String {
-        return javaCode
-            .lines()
-            .filterNot { it.trimStart().startsWith("//") }
-            .joinToString("\n")
-    }
-}
-
 class MultiCommentLine : Filter {
     override fun invoke(javaCode: String): String {
-        var opened = false
-        return javaCode
-            .lines()
-            .joinToString("\n") {
-                if (it.contains("/*")) {
-                    opened = true
-                    it.substring(0, it.indexOf("/*")).trim()
-                } else if (it.contains("*/")) {
-                    opened = false
-                    it.substring(it.indexOf("*/") + 2).trim()
-                } else if (opened) {
-                    "" // remove
-                } else {
-                    it
+        var index = 0
+        val newText = mutableListOf<Char>()
+        var multiOpened = false
+        var inString = false
+
+        while (index < javaCode.length) {
+            val cur = javaCode[index]
+            val next = javaCode.getOrNull(index + 1)
+            when {
+                cur == '\\' && next == '"' && multiOpened.not() -> {
+                    newText.add(cur)
+                    newText.add(next)
+                    index += 2
                 }
-            }.let {
-                EmptyLineFilter().invoke(it)
+
+                cur == '"' && multiOpened.not() -> {
+                    inString = inString.not()
+                    newText.add(cur)
+                    index++
+                }
+
+                inString && multiOpened.not() -> {
+                    newText.add(cur)
+                    index++
+                }
+                // string end
+
+                cur == '\n' -> {
+                    newText.add(cur)
+                    index++
+                }
+
+                // empty line end
+
+                cur == '/' && next == '*' && multiOpened.not() -> {
+                    multiOpened = true
+                    index += 2
+                }
+
+                cur == '*' && next == '/' && multiOpened -> {
+                    multiOpened = false
+                    index += 2
+                }
+
+                multiOpened -> {
+                    index++
+                }
+
+                // multi comment end
+
+                cur == '/' && next == '/' -> {
+                    val newLineIndex = javaCode.indexOf(System.lineSeparator(), index)
+                    index = if (newLineIndex == -1) {
+                        javaCode.length
+                    } else {
+                        newLineIndex
+                    }
+                }
+
+                else -> {
+                    newText.add(cur)
+                    index++
+                }
             }
+
+            println(newText.joinToString(""))
+        }
+        return newText.joinToString("")
     }
 }
