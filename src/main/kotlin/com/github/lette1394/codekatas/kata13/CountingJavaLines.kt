@@ -42,7 +42,7 @@ class CommentLine : Filter {
     override fun invoke(javaCode: String): String {
         return javaCode
             .lines()
-            .filterNot { it.contains("//") }
+            .filterNot { it.trimStart().startsWith("//") }
             .joinToString("\n")
     }
 }

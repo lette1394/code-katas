@@ -63,6 +63,20 @@ class CountingJavaLinesTest : StringSpec({
         sut.count() shouldBe 4
     }
 
+    "단일 주석이 코드 뒤에 있으면 라인 수로 센다" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |  public static void main(String[] args) {
+            |    System.out.println("Hello, World!"); // comment after code
+            |  }
+            |}
+            """.trimMargin()
+        val sut = CountingJavaLines(javaCode)
+
+        sut.count() shouldBe 5
+    }
+
     "빈 줄은 라인 수로 세지 않는다" {
         // language=java
         val javaCode = """
