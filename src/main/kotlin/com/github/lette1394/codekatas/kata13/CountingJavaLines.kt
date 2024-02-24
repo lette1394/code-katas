@@ -4,16 +4,39 @@ class CountingJavaLines(
     private val javaCode: String,
 ) {
     fun count(): Long {
-        if (javaCode.lines().any { it.isBlank() }) {
-            return javaCode.lines().filter { it.isNotBlank() }.size.toLong()
-        } else if (javaCode.contains("\n\n")) {
-            return javaCode.lines().size.toLong() - 1
-        } else if (javaCode.contains("//")) {
-            return javaCode.lines().size.toLong() - javaCode.lines().filter { it.contains("//") }.size.toLong()
-        } else if (javaCode.isNotBlank()) {
-            return javaCode.lines().size.toLong()
-        } else {
+        val filteredJavaCode = CommentLine().invoke(EmptyLineFilter().invoke(IdentityFilter().invoke(javaCode)))
+        if (filteredJavaCode.isBlank()) {
             return 0L
+        } else {
+            return filteredJavaCode.lines().size.toLong()
         }
+    }
+}
+
+interface Filter {
+    fun invoke(javaCode: String): String
+}
+
+class IdentityFilter : Filter {
+    override fun invoke(javaCode: String): String {
+        return javaCode
+    }
+}
+
+class EmptyLineFilter : Filter {
+    override fun invoke(javaCode: String): String {
+        return javaCode
+            .lines()
+            .filter { it.isNotBlank() }
+            .joinToString("\n")
+    }
+}
+
+class CommentLine : Filter {
+    override fun invoke(javaCode: String): String {
+        return javaCode
+            .lines()
+            .filterNot { it.contains("//") }
+            .joinToString("\n")
     }
 }
