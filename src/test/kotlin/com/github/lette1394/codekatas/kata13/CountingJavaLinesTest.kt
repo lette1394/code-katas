@@ -6,8 +6,8 @@ import io.kotest.matchers.shouldBe
 // see http://codekata.com/kata/kata13-counting-code-lines/
 
 class CountingJavaLinesTest : StringSpec({
-    "test" {
-        println("".lines().size)
+    "빈 문자열의 lines() 메서드는 1을 반환한다" {
+        "".lines().size shouldBe 1
     }
 
     "비어있는 코드는 라인 수가 없다" {
