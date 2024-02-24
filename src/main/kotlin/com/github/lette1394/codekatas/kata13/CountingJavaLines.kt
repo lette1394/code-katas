@@ -66,27 +66,31 @@ abstract class BaseCountingState(
     }
 
     protected fun cur(): Char? {
-        return next(0)
+        return nextAt(0)
     }
 
     protected fun next(): Char? {
-        return next(1)
+        return nextAt(1)
     }
 
-    protected fun next(offset: Int): Char? {
+    protected fun nextAt(offset: Int): Char? {
         return javaCode.getOrNull(index + offset)
     }
 
-    protected fun multiLineCommentStarted(offset: Int): Boolean {
-        return next(offset) == '/' && next(offset + 1) == '*'
+    protected fun multiLineCommentStartedAt(offset: Int): Boolean {
+        return nextAt(offset) == '/' && nextAt(offset + 1) == '*'
     }
 
-    protected fun singleLineCommentStarted(offset: Int): Boolean {
-        return next(offset) == '/' && next(offset + 1) == '/'
+    protected fun singleLineCommentStartedAt(offset: Int): Boolean {
+        return nextAt(offset) == '/' && nextAt(offset + 1) == '/'
     }
 
-    protected fun isDoubleColon(offset: Int): Boolean {
-        return next(offset) == '"'
+    protected fun isDoubleColonAt(offset: Int): Boolean {
+        return nextAt(offset) == '"'
+    }
+
+    protected fun isLineBreakAt(offset: Int): Boolean {
+        return nextAt(offset) == '\n'
     }
 }
 
@@ -95,7 +99,7 @@ class InMultiLineComments(
     javaCode: String,
 ) : BaseCountingState(index, javaCode) {
     override fun appendTo(stringBuilder: StringBuilder) {
-        if (cur() == '\n') {
+        if (isLineBreakAt(0)) {
             stringBuilder.append(cur())
         }
     }
@@ -103,11 +107,15 @@ class InMultiLineComments(
     // TODO: 성능 최적화 가능 "*/" 끝나는곳까지 점프 가능
     //  단, line break는 넣어야함
     override fun nextState(): CountingState {
-        return if (cur() == '*' && next() == '/') {
+        return if (multiLineCommentEnded()) {
             InitialState(index + 2, javaCode)
         } else {
             InMultiLineComments(index + 1, javaCode)
         }
+    }
+
+    private fun multiLineCommentEnded(): Boolean {
+        return cur() == '*' && next() == '/'
     }
 }
 
@@ -121,11 +129,15 @@ class InSingleLineComments(
 
     // TODO: 성능 최적화 가능 "\n" 만나기전까지 점프 가능
     override fun nextState(): CountingState {
-        return if (next() == '\n') {
+        return if (singleLineCommentEnded()) {
             InExpression(index + 1, javaCode)
         } else {
             InSingleLineComments(index + 1, javaCode)
         }
+    }
+
+    private fun singleLineCommentEnded(): Boolean {
+        return isLineBreakAt(1)
     }
 }
 
@@ -153,9 +165,9 @@ class InExpression(
 
     override fun nextState(): CountingState {
         return when {
-            multiLineCommentStarted(1) -> InMultiLineComments(index + 3, javaCode)
-            singleLineCommentStarted(1) -> InSingleLineComments(index + 3, javaCode)
-            isDoubleColon(1) -> InString(index + 1, javaCode)
+            multiLineCommentStartedAt(1) -> InMultiLineComments(index + 3, javaCode)
+            singleLineCommentStartedAt(1) -> InSingleLineComments(index + 3, javaCode)
+            isDoubleColonAt(1) -> InString(index + 1, javaCode)
             else -> InExpression(index + 1, javaCode)
         }
     }
@@ -171,9 +183,9 @@ class InitialState(
 
     override fun nextState(): CountingState {
         return when {
-            multiLineCommentStarted(0) -> InMultiLineComments(index, javaCode)
-            singleLineCommentStarted(0) -> InSingleLineComments(index, javaCode)
-            isDoubleColon(0) -> InString(index, javaCode)
+            multiLineCommentStartedAt(0) -> InMultiLineComments(index, javaCode)
+            singleLineCommentStartedAt(0) -> InSingleLineComments(index, javaCode)
+            isDoubleColonAt(0) -> InString(index, javaCode)
             else -> InExpression(index, javaCode)
         }
     }
