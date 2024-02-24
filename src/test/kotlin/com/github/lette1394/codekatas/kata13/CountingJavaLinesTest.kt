@@ -77,6 +77,21 @@ class CountingJavaLinesTest : StringSpec({
         sut.count() shouldBe 5
     }
 
+    "단일 주석을 표현하는 기호가 제 기능을 못하는 경우 라인 수로 센다" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |  public static void main(String[] args) {
+            |    System.out.println("Hello, // World!"); 
+            |    System.out.println("Hello, // World!"); 
+            |  }
+            |}
+            """.trimMargin()
+        val sut = CountingJavaLines(javaCode)
+
+        sut.count() shouldBe 6
+    }
+
     "빈 줄은 라인 수로 세지 않는다" {
         // language=java
         val javaCode = """
