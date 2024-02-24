@@ -22,4 +22,3 @@ My Implementation on http://codekata.com/kata/kata13-counting-code-lines/
     - 계산을 한 번만 하면서 불변하게 할 수 있는 방법이 없을까?
     - 생성자에 로직을 넣고 싶지는 않음
   - 현재 구현에서는 멀티라인/싱글라인 주석 각각에만 적용되어있음
-- 
