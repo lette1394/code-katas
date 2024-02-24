@@ -1,11 +1,11 @@
-package com.github.lette1394.mailserver
+package com.github.lette1394.codekatas
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class MailserverApplication
+class CodeKatasApplication
 
 fun main(args: Array<String>) {
-	runApplication<MailserverApplication>(*args)
+	runApplication<CodeKatasApplication>(*args)
 }

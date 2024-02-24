@@ -1,1 +1,1 @@
-# mail-server
+# code-katas
