@@ -3,16 +3,16 @@ package com.github.lette1394.codekatas.kata13
 class InExpression(
     index: Int,
     javaCode: String,
-) : BaseCountingState(index, javaCode) {
+) : CountingJavaLineStateBase(index, javaCode) {
 
     override fun appendTo(stringBuilder: StringBuilder) {
         stringBuilder.append(cur())
     }
 
-    override fun nextState(): CountingState {
+    override fun nextState(): CountingJavaLineState {
         return when {
-            multiLineCommentStartedAt(1) -> InMultiLineComments(index + 3, javaCode)
-            singleLineCommentStartedAt(1) -> InSingleLineComments(index + 3, javaCode)
+            multiLineCommentStartedAt(1) -> InCommentsOnMultiLine(index + 3, javaCode)
+            singleLineCommentStartedAt(1) -> InCommentsOnSingleLine(index + 3, javaCode)
             isDoubleColonAt(1) -> InString(index + 1, javaCode)
             else -> InExpression(index + 1, javaCode)
         }

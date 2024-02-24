@@ -1,9 +1,9 @@
 package com.github.lette1394.codekatas.kata13
 
-abstract class BaseCountingState(
+abstract class CountingJavaLineStateBase(
     protected val index: Int,
     protected val javaCode: String,
-) : CountingState {
+) : CountingJavaLineState {
 
     override fun hasNext(): Boolean {
         return index < javaCode.length

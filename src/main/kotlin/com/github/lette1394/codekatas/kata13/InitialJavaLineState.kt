@@ -1,18 +1,18 @@
 package com.github.lette1394.codekatas.kata13
 
-class InitialState(
+class InitialJavaLineState(
     index: Int,
     javaCode: String,
-) : BaseCountingState(index, javaCode) {
+) : CountingJavaLineStateBase(index, javaCode) {
 
     override fun appendTo(stringBuilder: StringBuilder) {
         // do nothing
     }
 
-    override fun nextState(): CountingState {
+    override fun nextState(): CountingJavaLineState {
         return when {
-            multiLineCommentStartedAt(0) -> InMultiLineComments(index, javaCode)
-            singleLineCommentStartedAt(0) -> InSingleLineComments(index, javaCode)
+            multiLineCommentStartedAt(0) -> InCommentsOnMultiLine(index, javaCode)
+            singleLineCommentStartedAt(0) -> InCommentsOnSingleLine(index, javaCode)
             isDoubleColonAt(0) -> InString(index, javaCode)
             else -> InExpression(index, javaCode)
         }

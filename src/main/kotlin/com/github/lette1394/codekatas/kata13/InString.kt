@@ -3,15 +3,15 @@ package com.github.lette1394.codekatas.kata13
 class InString(
     index: Int,
     javaCode: String,
-) : BaseCountingState(index, javaCode) {
+) : CountingJavaLineStateBase(index, javaCode) {
 
     override fun appendTo(stringBuilder: StringBuilder) {
         stringBuilder.append(cur())
     }
 
-    override fun nextState(): CountingState {
+    override fun nextState(): CountingJavaLineState {
         return when {
-            next() == '\\' -> InEscapeString(index + 1, javaCode)
+            next() == '\\' -> InStringWithEscape(index + 1, javaCode)
             next() == '"' -> InExpression(index + 1, javaCode)
             else -> InString(index + 1, javaCode)
         }

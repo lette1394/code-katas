@@ -21,7 +21,7 @@ class CountingJavaLines(
 
     fun commentsRemoved(): String {
         val builder = StringBuilder()
-        var state: CountingState = InitialState(0, javaCode)
+        var state: CountingJavaLineState = InitialJavaLineState(0, javaCode)
 
         while (state.hasNext()) {
             state.appendTo(builder)

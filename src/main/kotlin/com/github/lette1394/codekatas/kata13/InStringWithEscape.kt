@@ -1,16 +1,16 @@
 package com.github.lette1394.codekatas.kata13
 
-class InEscapeString(
+class InStringWithEscape(
     index: Int,
     javaCode: String,
-) : BaseCountingState(index, javaCode) {
+) : CountingJavaLineStateBase(index, javaCode) {
 
     override fun appendTo(stringBuilder: StringBuilder) {
         stringBuilder.append(cur())
         stringBuilder.append(next())
     }
 
-    override fun nextState(): CountingState {
+    override fun nextState(): CountingJavaLineState {
         return InString(index + 2, javaCode)
     }
 }

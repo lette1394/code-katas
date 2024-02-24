@@ -1,15 +1,15 @@
 package com.github.lette1394.codekatas.kata13
 
-class InSingleLineComments(
+class InCommentsOnSingleLine(
     index: Int,
     javaCode: String,
-) : BaseCountingState(index, javaCode) {
+) : CountingJavaLineStateBase(index, javaCode) {
 
     override fun appendTo(stringBuilder: StringBuilder) {
         // do nothing
     }
 
-    override fun nextState(): CountingState {
+    override fun nextState(): CountingJavaLineState {
         return InExpression(index + getNextOffset(), javaCode)
     }
 

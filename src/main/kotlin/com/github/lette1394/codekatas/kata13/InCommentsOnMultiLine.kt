@@ -1,9 +1,9 @@
 package com.github.lette1394.codekatas.kata13
 
-class InMultiLineComments(
+class InCommentsOnMultiLine(
     index: Int,
     javaCode: String,
-) : BaseCountingState(index, javaCode) {
+) : CountingJavaLineStateBase(index, javaCode) {
 
     override fun appendTo(stringBuilder: StringBuilder) {
         runEveryBlockUntilEndedThenGetOffset { offset ->
@@ -11,11 +11,11 @@ class InMultiLineComments(
         }
     }
 
-    override fun nextState(): CountingState {
+    override fun nextState(): CountingJavaLineState {
         val offset = runEveryBlockUntilEndedThenGetOffset {
             // do nothing
         }
-        return InitialState(index + offset + 2, javaCode)
+        return InitialJavaLineState(index + offset + 2, javaCode)
     }
 
     // TODO: 뭔가... 상위 클래스로 올려서 더 범용적으로 쓸 수 있을거같음

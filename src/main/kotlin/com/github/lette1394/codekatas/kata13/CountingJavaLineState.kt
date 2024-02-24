@@ -7,7 +7,7 @@ package com.github.lette1394.codekatas.kata13
  *
  *
  */
-interface CountingState {
+interface CountingJavaLineState {
     /**
      * 이 메서드를 통해 현재 상태에서 추가할 문자열을 출력한다.
      *
@@ -18,7 +18,7 @@ interface CountingState {
     /**
      * 다음 상태로 이동한다.
      */
-    fun nextState(): CountingState
+    fun nextState(): CountingJavaLineState
 
     fun hasNext(): Boolean
 }
