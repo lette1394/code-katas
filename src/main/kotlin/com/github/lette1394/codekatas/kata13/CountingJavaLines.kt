@@ -1,6 +1,6 @@
 package com.github.lette1394.codekatas.kata13
 
-class CountingLines(
+class CountingJavaLines(
     private val javaCode: String,
 ) {
     fun count(): Long {
@@ -9,7 +9,7 @@ class CountingLines(
         } else if (javaCode.contains("\n\n")) {
             return javaCode.lines().size.toLong() - 1
         } else if (javaCode.contains("//")) {
-            return javaCode.lines().size.toLong() - 1
+            return javaCode.lines().size.toLong() - javaCode.lines().filter { it.contains("//") }.size.toLong()
         } else if (javaCode.isNotBlank()) {
             return javaCode.lines().size.toLong()
         } else {

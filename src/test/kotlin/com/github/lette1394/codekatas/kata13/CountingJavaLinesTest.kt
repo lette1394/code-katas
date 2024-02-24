@@ -5,11 +5,11 @@ import io.kotest.matchers.shouldBe
 
 // see http://codekata.com/kata/kata13-counting-code-lines/
 
-class CountingLinesTest : StringSpec({
+class CountingJavaLinesTest : StringSpec({
     "비어있는 코드는 라인 수가 없다" {
         // language=java
         val javaCode = ""
-        val sut = CountingLines(javaCode)
+        val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 0
     }
@@ -23,7 +23,7 @@ class CountingLinesTest : StringSpec({
             |  }
             |}
             """.trimMargin()
-        val sut = CountingLines(javaCode)
+        val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 5
     }
@@ -37,7 +37,24 @@ class CountingLinesTest : StringSpec({
             |  }
             |}
             """.trimMargin()
-        val sut = CountingLines(javaCode)
+        val sut = CountingJavaLines(javaCode)
+
+        sut.count() shouldBe 4
+    }
+
+    "여러 개의 단일 주석은 라인 수로 세지 않는다" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |  public static void main(String[] args) {
+            |    // System.out.println("Hello, World!");
+            |    // comment 0
+            |  }
+            |  
+            |  // comment 1
+            |}
+            """.trimMargin()
+        val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 4
     }
@@ -52,7 +69,7 @@ class CountingLinesTest : StringSpec({
             |  }
             |}
             """.trimMargin()
-        val sut = CountingLines(javaCode)
+        val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 5
     }
@@ -74,7 +91,7 @@ class CountingLinesTest : StringSpec({
             |}
             |
             """.trimMargin()
-        val sut = CountingLines(javaCode)
+        val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 5
     }
@@ -89,7 +106,7 @@ class CountingLinesTest : StringSpec({
             |  }
             |}
             """.trimMargin()
-        val sut = CountingLines(javaCode)
+        val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 5
     }
@@ -111,7 +128,7 @@ class CountingLinesTest : StringSpec({
             |
             |
             """.trimMargin()
-        val sut = CountingLines(javaCode)
+        val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 5
     }
