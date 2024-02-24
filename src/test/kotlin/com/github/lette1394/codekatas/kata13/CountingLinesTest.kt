@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 
 class CountingLinesTest : StringSpec({
     "비어있는 코드는 라인 수가 없다" {
+        // language=java
         val javaCode = ""
         val sut = CountingLines(javaCode)
 
@@ -14,6 +15,7 @@ class CountingLinesTest : StringSpec({
     }
 
     "빈 줄이 없는 코드는 곧 코드 만큼 라인 수를 갖는다" {
+        // language=java
         val javaCode = """
             |class Simple {
             |  public static void main(String[] args) {
@@ -27,6 +29,7 @@ class CountingLinesTest : StringSpec({
     }
 
     "주석은 라인 수로 세지 않는다" {
+        // language=java
         val javaCode = """
             |class Simple {
             |  public static void main(String[] args) {
