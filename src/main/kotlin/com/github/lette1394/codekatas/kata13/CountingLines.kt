@@ -4,7 +4,9 @@ class CountingLines(
     private val javaCode: String,
 ) {
     fun count(): Long {
-        if (javaCode.contains("\n\n")) {
+        if (javaCode.lines().any { it.isBlank() }) {
+            return javaCode.lines().filter { it.isNotBlank() }.size.toLong()
+        } else if (javaCode.contains("\n\n")) {
             return javaCode.lines().size.toLong() - 1
         } else if (javaCode.contains("//")) {
             return javaCode.lines().size.toLong() - 1
