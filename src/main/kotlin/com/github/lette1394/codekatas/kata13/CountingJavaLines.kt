@@ -99,23 +99,33 @@ class InMultiLineComments(
     javaCode: String,
 ) : BaseCountingState(index, javaCode) {
     override fun appendTo(stringBuilder: StringBuilder) {
-        if (isLineBreakAt(0)) {
-            stringBuilder.append(cur())
+        runEveryBlockUntilEndedThenGetOffset { offset ->
+            stringBuilder.append(nextAt(offset))
         }
     }
 
-    // TODO: 성능 최적화 가능 "*/" 끝나는곳까지 점프 가능
-    //  단, line break는 넣어야함
     override fun nextState(): CountingState {
-        return if (multiLineCommentEnded()) {
-            InitialState(index + 2, javaCode)
-        } else {
-            InMultiLineComments(index + 1, javaCode)
+        val offset = runEveryBlockUntilEndedThenGetOffset {
+            // do nothing
         }
+        return InitialState(index + offset + 2, javaCode)
     }
 
-    private fun multiLineCommentEnded(): Boolean {
-        return cur() == '*' && next() == '/'
+    private fun runEveryBlockUntilEndedThenGetOffset(block: (offset: Int) -> Unit): Int {
+        var offset = 0
+        while (!multiLineCommentEndedAt(offset)) {
+            if (isLineBreakAt(offset)) {
+                block(offset)
+                offset++
+            } else {
+                offset++
+            }
+        }
+        return offset
+    }
+
+    private fun multiLineCommentEndedAt(offset: Int): Boolean {
+        return nextAt(offset) == '*' && nextAt(offset + 1) == '/'
     }
 }
 
@@ -127,17 +137,16 @@ class InSingleLineComments(
         // do nothing
     }
 
-    // TODO: 성능 최적화 가능 "\n" 만나기전까지 점프 가능
     override fun nextState(): CountingState {
-        return if (singleLineCommentEnded()) {
-            InExpression(index + 1, javaCode)
-        } else {
-            InSingleLineComments(index + 1, javaCode)
-        }
+        return InExpression(index + getNextOffset(), javaCode)
     }
 
-    private fun singleLineCommentEnded(): Boolean {
-        return isLineBreakAt(1)
+    private fun getNextOffset(): Int {
+        var offset = 0
+        while (!isLineBreakAt(offset)) {
+            offset++
+        }
+        return offset
     }
 }
 
