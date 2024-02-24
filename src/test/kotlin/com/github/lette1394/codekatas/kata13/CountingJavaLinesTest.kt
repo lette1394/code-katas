@@ -136,4 +136,42 @@ class CountingJavaLinesTest : StringSpec({
 
         sut.count() shouldBe 5
     }
+
+    "여러 개의 주석과 빈 줄이 섞여 있을 때" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |  // comment 0
+            |  public static void main(String[] args) {
+            |    // comment 1
+            |    System.out.println("Hello, World!");
+            |    // comment 2
+            |  }
+            |  // comment 3
+            |}
+            """.trimMargin()
+        val sut = CountingJavaLines(javaCode)
+
+        sut.count() shouldBe 5
+    }
+
+    "멀티 라인 주석은 라인 수로 세지 않는다" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |  /*
+            |   * comment 0
+            |   */
+            |  public static void main(String[] args) {
+            |    System.out.println("Hello, World!");
+            |  }
+            |  /*
+            |   * comment 1
+            |   */
+            |}
+            """.trimMargin()
+        val sut = CountingJavaLines(javaCode)
+
+        sut.count() shouldBe 5
+    }
 })
