@@ -2,6 +2,7 @@ package com.github.lette1394.codekatas.kata13
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import java.time.Instant
 
 // see http://codekata.com/kata/kata13-counting-code-lines/
 
@@ -221,6 +222,30 @@ class CountingJavaLinesTest : StringSpec({
         val sut = CountingJavaLines(javaCode)
 
         sut.count() shouldBe 5
+    }
+
+    "멀티라인 주석이 끝나자 마자 문자열이 존재하는 경우 코드로 남긴다" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |  public static void main(String[] args) { /*
+            |    this line should be removed
+            |  */"/*wow*/"
+            |  System.out.println("Hello Wor/*wow*/ld 2");
+            |  }
+            |}
+            """.trimMargin()
+        val sut = CountingJavaLines(javaCode)
+
+        // language=java
+        sut.commentsRemoved() shouldBe """
+            |class Simple {
+            |  public static void main(String[] args) { 
+            |"/*wow*/"
+            |  System.out.println("Hello Wor/*wow*/ld 2");
+            |  }
+            |}
+            """.trimMargin()
     }
 
     "Dave.java" {

@@ -4,22 +4,32 @@ class CountingJavaLines(
     private val javaCode: String,
 ) {
     fun count(): Long {
-        val stringBuilder = StringBuilder()
-        var initial: CountingState = Initial(0, javaCode)
-        while (initial.hasNext()) {
-            initial.appendTo(stringBuilder)
-            initial = initial.nextState()
+        val commentsRemoved = commentsRemoved()
+        return if (commentsRemoved.isBlank()) {
+            0L
+        } else {
+            commentsRemoved
+                .let {
+                    println(it)
+                    it
+                }
+                .lines()
+                .filter { it.isNotBlank() }
+                .size.toLong()
         }
+    }
 
-        return stringBuilder.toString().let {
-            println(it)
-
-            if (it.isBlank()) {
-                0L
-            } else {
-                it.lines().filter { it.isNotBlank() }.size.toLong()
-            }
+    fun commentsRemoved(): String {
+        val builder = StringBuilder()
+        var state: CountingState = InitialState(0, javaCode)
+        while (state.hasNext()) {
+            state.appendTo(builder)
+            state = state.nextState()
         }
+        return builder.toString()
+            .split("\n")
+            .filter { it.isNotBlank() }
+            .joinToString("\n")
     }
 }
 
@@ -56,19 +66,27 @@ abstract class BaseCountingState(
     }
 
     protected fun cur(): Char? {
-        return javaCode.getOrNull(index)
+        return next(0)
     }
 
     protected fun next(): Char? {
         return next(1)
     }
 
-    protected fun next2(): Char? {
-        return next(2)
-    }
-
     protected fun next(offset: Int): Char? {
         return javaCode.getOrNull(index + offset)
+    }
+
+    protected fun multiLineCommentStarted(offset: Int): Boolean {
+        return next(offset) == '/' && next(offset + 1) == '*'
+    }
+
+    protected fun singleLineCommentStarted(offset: Int): Boolean {
+        return next(offset) == '/' && next(offset + 1) == '/'
+    }
+
+    protected fun isDoubleColon(offset: Int): Boolean {
+        return next(offset) == '"'
     }
 }
 
@@ -86,7 +104,7 @@ class InMultiLineComments(
     //  단, line break는 넣어야함
     override fun nextState(): CountingState {
         return if (cur() == '*' && next() == '/') {
-            Initial(index + 2, javaCode)
+            InitialState(index + 2, javaCode)
         } else {
             InMultiLineComments(index + 1, javaCode)
         }
@@ -104,14 +122,14 @@ class InSingleLineComments(
     // TODO: 성능 최적화 가능 "\n" 만나기전까지 점프 가능
     override fun nextState(): CountingState {
         return if (next() == '\n') {
-            InCode(index + 1, javaCode)
+            InExpression(index + 1, javaCode)
         } else {
             InSingleLineComments(index + 1, javaCode)
         }
     }
 }
 
-class InEscaping(
+class InEscapeString(
     index: Int,
     javaCode: String,
 ) : BaseCountingState(index, javaCode) {
@@ -125,7 +143,7 @@ class InEscaping(
     }
 }
 
-class InCode(
+class InExpression(
     index: Int,
     javaCode: String,
 ) : BaseCountingState(index, javaCode) {
@@ -135,15 +153,15 @@ class InCode(
 
     override fun nextState(): CountingState {
         return when {
-            next() == '"' -> InString(index + 1, javaCode)
-            next() == '/' && next2() == '*' -> InMultiLineComments(index + 2, javaCode)
-            next() == '/' && next2() == '/' -> InSingleLineComments(index + 2, javaCode)
-            else -> InCode(index + 1, javaCode)
+            multiLineCommentStarted(1) -> InMultiLineComments(index + 3, javaCode)
+            singleLineCommentStarted(1) -> InSingleLineComments(index + 3, javaCode)
+            isDoubleColon(1) -> InString(index + 1, javaCode)
+            else -> InExpression(index + 1, javaCode)
         }
     }
 }
 
-class Initial(
+class InitialState(
     index: Int,
     javaCode: String,
 ) : BaseCountingState(index, javaCode) {
@@ -153,9 +171,10 @@ class Initial(
 
     override fun nextState(): CountingState {
         return when {
-            cur() == '/' && next() == '*' -> InMultiLineComments(index, javaCode)
-            cur() == '/' && next() == '/' -> InSingleLineComments(index, javaCode)
-            else -> InCode(index, javaCode)
+            multiLineCommentStarted(0) -> InMultiLineComments(index, javaCode)
+            singleLineCommentStarted(0) -> InSingleLineComments(index, javaCode)
+            isDoubleColon(0) -> InString(index, javaCode)
+            else -> InExpression(index, javaCode)
         }
     }
 }
@@ -171,8 +190,8 @@ class InString(
 
     override fun nextState(): CountingState {
         return when {
-            next() == '\\' -> InEscaping(index + 1, javaCode)
-            next() == '"' -> InCode(index + 1, javaCode)
+            next() == '\\' -> InEscapeString(index + 1, javaCode)
+            next() == '"' -> InExpression(index + 1, javaCode)
             else -> InString(index + 1, javaCode)
         }
     }
