@@ -41,4 +41,19 @@ class CountingLinesTest : StringSpec({
 
         sut.count() shouldBe 4
     }
+
+    "빈 줄은 라인 수로 세지 않는다" {
+        // language=java
+        val javaCode = """
+            |class Simple {
+            |
+            |  public static void main(String[] args) {
+            |    System.out.println("Hello, World!");
+            |  }
+            |}
+            """.trimMargin()
+        val sut = CountingLines(javaCode)
+
+        sut.count() shouldBe 5
+    }
 })
